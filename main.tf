@@ -150,16 +150,17 @@ resource "aws_cloudfront_distribution" "default" {
   dynamic "origin" {
     for_each = var.custom_origins
     content {
-      domain_name = custom_origins.value.domain_name
-      origin_id   = custom_origins.value.origin_id
-      origin_path = custom_origins.value.origin_path
+      domain_name = origin.value.domain_name
+      origin_id   = origin.value.origin_id
+      origin_path = lookup(origin.value, "origin_path", "/")
+
       custom_origin_config {
-        http_port                = custom_origins.value.custom_origin_config.http_port
-        https_port               = custom_origins.value.custom_origin_config.https_port
-        origin_protocol_policy   = custom_origins.value.custom_origin_config.origin_protocol_policy
-        origin_ssl_protocols     = custom_origins.value.custom_origin_config.origin_ssl_protocols
-        origin_keepalive_timeout = custom_origins.value.custom_origin_config.origin_keepalive_timeout
-        origin_read_timeout      = custom_origins.value.custom_origin_config.origin_read_timeout
+        http_port                = lookup(origin.value.origin_config, "http_port", 80)
+        https_port               = lookup(origin.value.origin_config, "https_port", 443)
+        origin_protocol_policy   = lookup(origin.value.origin_config, "origin_protocol_policy", "http-only")
+        origin_ssl_protocols     = lookup(origin.value.origin_config, "origin_ssl_protocols")
+        origin_keepalive_timeout = lookup(origin.value.origin_config, "origin_keepalive_timeout", 60)
+        origin_read_timeout      = lookup(origin.value.origin_config, "origin_read_timeout", 60)
       }
     }
   }
