@@ -147,6 +147,23 @@ resource "aws_cloudfront_distribution" "default" {
     }
   }
 
+  dynamic "origin" {
+    for_each = var.custom_origins
+    content {
+      domain_name = custom_origins.value.domain_name
+      origin_id   = custom_origins.value.origin_id
+      origin_path = custom_origins.value.origin_path
+      custom_origin_config {
+        http_port                = custom_origins.value.custom_origin_config.http_port
+        https_port               = custom_origins.value.custom_origin_config.https_port
+        origin_protocol_policy   = custom_origins.value.custom_origin_config.origin_protocol_policy
+        origin_ssl_protocols     = custom_origins.value.custom_origin_config.origin_ssl_protocols
+        origin_keepalive_timeout = custom_origins.value.custom_origin_config.origin_keepalive_timeout
+        origin_read_timeout      = custom_origins.value.custom_origin_config.origin_read_timeout
+      }
+    }
+  }
+
   viewer_certificate {
     acm_certificate_arn            = var.acm_certificate_arn
     ssl_support_method             = "sni-only"
