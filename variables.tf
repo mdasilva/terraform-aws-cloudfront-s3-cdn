@@ -324,3 +324,7 @@ variable "wait_for_deployment" {
 variable "custom_origins" {
   description = "List of maps containing values for aws_cloudfront_distribution origin blocks"
 }
+
+variable "cache_behavior" {
+  description = "Map containing values for ordered_cache_behavior configuration"
+}
