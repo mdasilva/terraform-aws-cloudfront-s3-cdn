@@ -328,3 +328,9 @@ variable "custom_origins" {
 variable "cache_behavior" {
   description = "Map containing values for ordered_cache_behavior configuration"
 }
+
+variable "enable_versioning" {
+  type = bool
+  default = false
+  description = "Enable S3 bucket versioning"
+}
