@@ -325,12 +325,21 @@ variable "custom_origins" {
   description = "List of maps containing values for aws_cloudfront_distribution origin blocks"
 }
 
+variable "s3_origins" {
+  type = list(object({
+    domain_name = string
+    origin_id   = string
+    })
+  )
+}
+
 variable "cache_behavior" {
   description = "Map containing values for ordered_cache_behavior configuration"
 }
 
 variable "enable_versioning" {
-  type = bool
-  default = false
+  type        = bool
+  default     = false
   description = "Enable S3 bucket versioning"
 }
+

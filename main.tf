@@ -50,9 +50,27 @@ data "template_file" "default" {
   }
 }
 
+data "template_file" "s3_origins" {
+  count    = length(var.s3_origins)
+  template = data.aws_iam_policy_document.origin.json
+
+  vars = {
+    origin_path                               = "/"
+    bucket_name                               = lookup(element(var.s3_origins, "${count.index}"), "origin_id")
+    cloudfront_origin_access_identity_iam_arn = aws_cloudfront_origin_access_identity.default.iam_arn
+  }
+}
+
+
 resource "aws_s3_bucket_policy" "default" {
   bucket = local.bucket
   policy = data.template_file.default.rendered
+}
+
+resource "aws_s3_bucket_policy" "s3_origins" {
+  count  = length(var.s3_origins)
+  bucket = lookup(element(var.s3_origins, "${count.index}"), "origin_id")
+  policy = data.template_file.s3_origins["${count.index}"].rendered
 }
 
 data "aws_region" "current" {
@@ -152,6 +170,17 @@ resource "aws_cloudfront_distribution" "default" {
   }
 
   dynamic "origin" {
+    for_each = var.s3_origins
+    content {
+      domain_name = origin.value.domain_name
+      origin_id   = origin.value.origin_id
+      s3_origin_config {
+        origin_access_identity = aws_cloudfront_origin_access_identity.default.cloudfront_access_identity_path
+      }
+    }
+  }
+
+  dynamic "origin" {
     for_each = var.custom_origins
     content {
       domain_name = origin.value.domain_name
@@ -231,31 +260,31 @@ resource "aws_cloudfront_distribution" "default" {
       viewer_protocol_policy    = ordered_cache_behavior.value.viewer_protocol_policy
 
       dynamic "forwarded_values" {
-        for_each = lookup(ordered_cache_behavior.value, "forwarded_values", []) 
+        for_each = lookup(ordered_cache_behavior.value, "forwarded_values", [])
         content {
           headers                 = lookup(forwarded_values.value, "headers", null)
           query_string            = forwarded_values.value.query_string
           query_string_cache_keys = lookup(forwarded_values.value, "query_string_cache_keys", null)
 
           dynamic "cookies" {
-            for_each = lookup(forwarded_values.value, "cookies", []) 
+            for_each = lookup(forwarded_values.value, "cookies", [])
             content {
               forward           = cookies.value.forward
               whitelisted_names = lookup(cookies.value, "whitelisted_names", null)
-            }   
-          }   
-        }   
-      }   
+            }
+          }
+        }
+      }
 
       dynamic "lambda_function_association" {
-        for_each = lookup(ordered_cache_behavior.value, "lambda_function_association", []) 
+        for_each = lookup(ordered_cache_behavior.value, "lambda_function_association", [])
         content {
           event_type   = lambda_function_association.value.event_type
           include_body = lookup(lambda_function_association.value, "include_body", null)
           lambda_arn   = lambda_function_association.value.lambda_arn
-        }   
-      }   
-    }   
+        }
+      }
+    }
   }
 
   restrictions {
