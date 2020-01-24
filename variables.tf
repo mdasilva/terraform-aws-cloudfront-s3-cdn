@@ -343,7 +343,7 @@ variable "enable_versioning" {
   description = "Enable S3 bucket versioning"
 }
 
-variable "server_side_encryption" {
+variable "enable_server_side_encryption" {
   type        = bool
   default     = false
   description = "Enable AES256 encryption"

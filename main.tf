@@ -103,7 +103,7 @@ resource "aws_s3_bucket" "origin" {
   }
 
   dynamic "server_side_encryption_configuration" {
-    for_each = var.server_side_encryption ? ["enable"] : []
+    for_each = var.enable_server_side_encryption ? ["enable"] : []
     content {
       rule {
         apply_server_side_encryption_by_default {
