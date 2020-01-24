@@ -170,25 +170,6 @@ resource "aws_cloudfront_distribution" "default" {
     }
   }
 
-  dynamic "origin" {
-    for_each = var.custom_origins
-    content {
-      domain_name = origin.value.domain_name
-      origin_id   = origin.value.origin_id
-      origin_path = lookup(origin.value, "origin_path", "")
-
-      custom_origin_config {
-        http_port                = lookup(origin.value.origin_config, "http_port", 80)
-        https_port               = lookup(origin.value.origin_config, "https_port", 443)
-        origin_protocol_policy   = lookup(origin.value.origin_config, "origin_protocol_policy", "http-only")
-        origin_ssl_protocols     = lookup(origin.value.origin_config, "origin_ssl_protocols")
-        origin_keepalive_timeout = lookup(origin.value.origin_config, "origin_keepalive_timeout", 60)
-        origin_read_timeout      = lookup(origin.value.origin_config, "origin_read_timeout", 60)
-      }
-    }
-
-  }
-
   viewer_certificate {
     acm_certificate_arn            = var.acm_certificate_arn
     ssl_support_method             = "sni-only"
@@ -222,56 +203,6 @@ resource "aws_cloudfront_distribution" "default" {
         lambda_arn   = lambda_function_association.value.lambda_arn
       }
     }
-  }
-
-
-  dynamic "ordered_cache_behavior" {
-    for_each = var.cache_behavior
-    content {
-      # TF-UPGRADE-TODO: The automatic upgrade tool can't predict
-      # which keys might be set in maps assigned here, so it has 
-      # produced a comprehensive set here. Consider simplifying
-      # this after confirming which keys can be set in practice.
-
-      allowed_methods           = ordered_cache_behavior.value.allowed_methods
-      cached_methods            = ordered_cache_behavior.value.cached_methods
-      compress                  = lookup(ordered_cache_behavior.value, "compress", null)
-      default_ttl               = lookup(ordered_cache_behavior.value, "default_ttl", null)
-      field_level_encryption_id = lookup(ordered_cache_behavior.value, "field_level_encryption_id", null)
-      max_ttl                   = lookup(ordered_cache_behavior.value, "max_ttl", null)
-      min_ttl                   = lookup(ordered_cache_behavior.value, "min_ttl", null)
-      path_pattern              = ordered_cache_behavior.value.path_pattern
-      smooth_streaming          = lookup(ordered_cache_behavior.value, "smooth_streaming", null)
-      target_origin_id          = ordered_cache_behavior.value.target_origin_id
-      trusted_signers           = lookup(ordered_cache_behavior.value, "trusted_signers", null)
-      viewer_protocol_policy    = ordered_cache_behavior.value.viewer_protocol_policy
-
-      dynamic "forwarded_values" {
-        for_each = lookup(ordered_cache_behavior.value, "forwarded_values", []) 
-        content {
-          headers                 = lookup(forwarded_values.value, "headers", null)
-          query_string            = forwarded_values.value.query_string
-          query_string_cache_keys = lookup(forwarded_values.value, "query_string_cache_keys", null)
-
-          dynamic "cookies" {
-            for_each = lookup(forwarded_values.value, "cookies", []) 
-            content {
-              forward           = cookies.value.forward
-              whitelisted_names = lookup(cookies.value, "whitelisted_names", null)
-            }   
-          }   
-        }   
-      }   
-
-      dynamic "lambda_function_association" {
-        for_each = lookup(ordered_cache_behavior.value, "lambda_function_association", []) 
-        content {
-          event_type   = lambda_function_association.value.event_type
-          include_body = lookup(lambda_function_association.value, "include_body", null)
-          lambda_arn   = lambda_function_association.value.lambda_arn
-        }   
-      }   
-    }   
   }
 
   restrictions {
