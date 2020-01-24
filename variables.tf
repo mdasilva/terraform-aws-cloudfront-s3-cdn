@@ -321,14 +321,6 @@ variable "wait_for_deployment" {
   description = "When set to 'true' the resource will wait for the distribution status to change from InProgress to Deployed"
 }
 
-variable "custom_origins" {
-  description = "List of maps containing values for aws_cloudfront_distribution origin blocks"
-}
-
-variable "cache_behavior" {
-  description = "Map containing values for ordered_cache_behavior configuration"
-}
-
 variable "enable_versioning" {
   type        = bool
   default     = false

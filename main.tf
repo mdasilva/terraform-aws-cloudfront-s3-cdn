@@ -247,31 +247,31 @@ resource "aws_cloudfront_distribution" "default" {
       viewer_protocol_policy    = ordered_cache_behavior.value.viewer_protocol_policy
 
       dynamic "forwarded_values" {
-        for_each = lookup(ordered_cache_behavior.value, "forwarded_values", [])
+        for_each = lookup(ordered_cache_behavior.value, "forwarded_values", []) 
         content {
           headers                 = lookup(forwarded_values.value, "headers", null)
           query_string            = forwarded_values.value.query_string
           query_string_cache_keys = lookup(forwarded_values.value, "query_string_cache_keys", null)
 
           dynamic "cookies" {
-            for_each = lookup(forwarded_values.value, "cookies", [])
+            for_each = lookup(forwarded_values.value, "cookies", []) 
             content {
               forward           = cookies.value.forward
               whitelisted_names = lookup(cookies.value, "whitelisted_names", null)
-            }
-          }
-        }
-      }
+            }   
+          }   
+        }   
+      }   
 
       dynamic "lambda_function_association" {
-        for_each = lookup(ordered_cache_behavior.value, "lambda_function_association", [])
+        for_each = lookup(ordered_cache_behavior.value, "lambda_function_association", []) 
         content {
           event_type   = lambda_function_association.value.event_type
           include_body = lookup(lambda_function_association.value, "include_body", null)
           lambda_arn   = lambda_function_association.value.lambda_arn
-        }
-      }
-    }
+        }   
+      }   
+    }   
   }
 
   restrictions {
