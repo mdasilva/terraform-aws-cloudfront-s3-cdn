@@ -94,6 +94,14 @@ resource "aws_s3_bucket" "origin" {
     max_age_seconds = var.cors_max_age_seconds
   }
 
+  dynamic "logging" {
+    for_each = var.enable_logging ? ["enable"] : []
+    content {
+      target_bucket = "${var.logging_bucket}"
+      target_prefix = "${var.logging_bucket_prefix}"
+    }
+  }
+
   dynamic "server_side_encryption_configuration" {
     for_each = var.server_side_encryption ? ["enable"] : []
     content {

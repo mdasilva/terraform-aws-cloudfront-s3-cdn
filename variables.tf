@@ -348,3 +348,21 @@ variable "server_side_encryption" {
   default     = false
   description = "Enable AES256 encryption"
 }
+
+variable "enable_logging" {
+  type        = bool
+  default     = false
+  description = "Enable server access logging"
+}
+
+variable "logging_bucket" {
+  type        = string
+  default     = ""
+  description = "S3 bucket ID used for server access logging"
+}
+
+variable "logging_bucket_prefix" {
+  type        = string
+  default     = "log/"
+  description = "S3 bucket prefix for server access logging"
+}
