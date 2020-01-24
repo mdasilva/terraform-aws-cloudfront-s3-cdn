@@ -94,6 +94,17 @@ resource "aws_s3_bucket" "origin" {
     max_age_seconds = var.cors_max_age_seconds
   }
 
+  dynamic "server_side_encryption_configuration" {
+    for_each = var.server_side_encryption ? ["enable"] : []
+    content {
+      rule {
+        apply_server_side_encryption_by_default {
+          sse_algorithm = "AES256"
+        }
+      }
+    }
+  }
+
   versioning {
     enabled = var.enable_versioning
   }
